@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>ถามผู้ช่วย AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-lg">
+    <h1 class="text-3xl font-bold text-center text-blue-700 mb-4">ถามผู้ช่วย AI</h1>
+
+    <div class="mb-4">
+      <textarea id="userInput" rows="4" class="w-full p-4 text-lg border rounded-xl" placeholder="พิมพ์คำถามของคุณ เช่น แนะนำที่เที่ยวเชียงใหม่"></textarea>
+    </div>
+
+    <button onclick="askAI()" class="w-full py-3 bg-blue-600 text-white text-xl rounded-xl hover:bg-blue-700">ถาม</button>
+
+    <div id="responseBox" class="mt-6 p-4 bg-blue-100 rounded-xl text-lg leading-relaxed hidden"></div>
+  </div>
+
+  <script>
+    async function askAI() {
+      const userInput = document.getElementById("userInput").value;
+      const responseBox = document.getElementById("responseBox");
+
+      responseBox.classList.remove("hidden");
+      responseBox.innerText = "⏳ กำลังประมวลผล...";
+
+      try {
+        const res = await fetch("http://127.0.0.1:8000/ask-ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" ,
+                      "api-key": "<api-key>"
+                    },
+          body: JSON.stringify({ content: userInput })
+        });
+
+        const data = await res.json();
+        if (data.response) {
+          responseBox.innerText = "🧠 คำตอบ:\n\n" + data.response;
+        } else if (data.error) {
+          responseBox.innerText = "❌ เกิดข้อผิดพลาด: " + data.error;
+        } else {
+          responseBox.innerText = "❌ ไม่สามารถรับข้อมูลจาก AI ได้";
+        }
+
+      } catch (err) {
+        responseBox.innerText = "❌ ไม่สามารถเชื่อมต่อ API ได้: " + err;
+      }
+    }
+  </script>
+</body>
+</html>
